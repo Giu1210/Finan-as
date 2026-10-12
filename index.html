@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#101512">
+  <title>Verde — Controle Financeiro</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="script.js" defer></script>
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar" id="sidebar">
+      <a class="brand" href="#" aria-label="Verde início"><span class="brand-mark">V</span><span>verde<span class="brand-dot">.</span><small>FINANCEIRO PESSOAL</small></span></a>
+      <div class="nav-label">MENU PRINCIPAL</div>
+      <nav class="nav">
+        <a class="nav-link active" href="#overview"><span>◫</span> Visão geral</a>
+        <a class="nav-link" href="#transactions"><span>↕</span> Movimentações</a>
+        <a class="nav-link" href="#bills"><span>▤</span> Contas a pagar <span class="nav-count" id="billCount">0</span></a>
+        <a class="nav-link" href="#debts"><span>▱</span> Dívidas e cartões</a>
+        <a class="nav-link" href="#goals"><span>◎</span> Metas financeiras</a>
+        <a class="nav-link" href="#reports"><span>▥</span> Relatórios</a>
+      </nav>
+      <div class="sidebar-bottom">
+        <div class="tip-card"><div class="tip-icon">✦</div><strong>Pequenos passos.</strong><p>E sua Namorada Feliz.</p></div>
+        <button class="side-action" id="exportBtn">⇩ <span>Exportar dados (JSON)</span></button>
+        <button class="side-action" id="importBtn">⇧ <span>Importar backup</span></button>
+        <input type="file" id="importFile" accept=".json,application/json" hidden>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <header class="topbar">
+        <button class="mobile-menu" id="menuBtn" aria-label="Abrir menu">☰</button>
+        <div><p class="eyebrow" id="todayLabel">SEU DINHEIRO, SOB SEU CONTROLE</p><h1>Visão geral</h1></div>
+        <div class="top-actions"><label class="month-picker">▦ <input type="month" id="monthFilter" aria-label="Selecionar mês"></label><button class="primary-btn" id="quickAddBtn">＋ <span>Nova movimentação</span></button></div>
+      </header>
+
+      <section class="welcome-row">
+        <div><p class="muted">RESUMO DO MÊS</p><h2>Olá! Vamos cuidar do seu dinheiro. <span>✳</span></h2><p class="muted">Acompanhe suas escolhas e construa seus próximos planos.</p></div>
+        <div class="date-chip"><span class="live-dot"></span><span id="monthName">Este mês</span></div>
+      </section>
+
+      <section class="stats-grid" id="overview">
+        <article class="stat-card balance-card"><div class="stat-top"><span>Saldo acumulado</span><span class="stat-icon">◈</span></div><div class="stat-value" id="balanceValue">R$ 0,00</div><div class="stat-foot"><span class="tiny-dot green"></span><span>Entradas menos saídas registradas</span></div></article>
+        <article class="stat-card"><div class="stat-top"><span>Entradas no mês</span><span class="stat-icon income-icon">↙</span></div><div class="stat-value" id="incomeValue">R$ 0,00</div><div class="stat-foot"><span class="positive" id="incomeCount">0 registros</span><span> neste mês</span></div></article>
+        <article class="stat-card"><div class="stat-top"><span>Saídas no mês</span><span class="stat-icon expense-icon">↗</span></div><div class="stat-value" id="expenseValue">R$ 0,00</div><div class="stat-foot"><span id="expenseCount">0 registros</span><span> neste mês</span></div></article>
+        <article class="stat-card"><div class="stat-top"><span>Contas em aberto</span><span class="stat-icon bills-icon">▤</span></div><div class="stat-value" id="openBillsValue">R$ 0,00</div><div class="stat-foot"><span id="openBillsCaption">0 contas pendentes</span></div></article>
+      </section>
+
+      <section class="content-grid">
+        <article class="panel chart-panel" id="reports"><div class="panel-heading"><div><h3>Fluxo financeiro</h3><p>Entradas e saídas dos últimos 6 meses</p></div><span class="panel-badge">6 MESES</span></div><div class="chart-wrap"><canvas id="flowChart" aria-label="Gráfico de entradas e saídas"></canvas></div></article>
+        <article class="panel"><div class="panel-heading"><div><h3>Despesas por categoria</h3><p>Como seu dinheiro foi distribuído</p></div><span class="panel-dots">•••</span></div><div class="donut-wrap"><canvas id="categoryChart" aria-label="Gráfico de despesas por categoria"></canvas><div class="donut-center"><strong id="donutTotal">R$ 0</strong><span>despesas</span></div></div><div class="category-legend" id="categoryLegend"><p class="empty-state">Adicione despesas para ver as categorias.</p></div></article>
+      </section>
+
+      <section class="content-grid lower-grid">
+        <article class="panel" id="transactions"><div class="panel-heading"><div><h3>Movimentações recentes</h3><p>Entradas e saídas registradas</p></div><button class="text-btn" id="seeAllBtn">Ver todas ↗</button></div><div class="table-scroll"><table><thead><tr><th>DESCRIÇÃO</th><th>CATEGORIA</th><th>DATA</th><th>VALOR</th><th></th></tr></thead><tbody id="transactionsBody"></tbody></table></div><div class="empty-state" id="transactionsEmpty">Nenhuma movimentação neste período.</div></article>
+        <article class="panel" id="goals"><div class="panel-heading"><div><h3>Metas financeiras</h3><p>Planos que estão saindo do papel</p></div><button class="icon-btn" id="addGoalBtn" aria-label="Adicionar meta">＋</button></div><div id="goalsList" class="goals-list"></div><div class="empty-state" id="goalsEmpty">Crie uma meta para acompanhar seu progresso.</div></article>
+      </section>
+
+      <section class="content-grid lower-grid second-row">
+        <article class="panel" id="bills"><div class="panel-heading"><div><h3>Contas a pagar</h3><p>Não deixe nenhum vencimento passar</p></div><button class="text-btn" id="addBillBtn">＋ Adicionar</button></div><div id="billsList" class="list-stack"></div><div class="empty-state" id="billsEmpty">Nenhuma conta cadastrada.</div></article>
+        <article class="panel" id="debts"><div class="panel-heading"><div><h3>Dívidas e cartões</h3><p>Tenha clareza do que falta pagar</p></div><button class="text-btn" id="addDebtBtn">＋ Adicionar</button></div><div id="debtsList" class="list-stack"></div><div class="empty-state" id="debtsEmpty">Nenhuma dívida cadastrada.</div></article>
+      </section>
+      <footer>Feito para organizar, planejar e respirar mais tranquilo. <span>Seus dados ficam neste navegador.</span></footer>
+    </main>
+  </div>
+
+  <dialog id="transactionDialog" class="modal">
+    <form id="transactionForm" method="dialog">
+      <div class="modal-heading"><div><p class="eyebrow">MOVIMENTAÇÃO</p><h2 id="transactionModalTitle">Nova movimentação</h2></div><button type="button" class="close-btn" data-close="transactionDialog" aria-label="Fechar">×</button></div>
+      <input type="hidden" id="transactionId">
+      <div class="field"><label>Tipo</label><div class="segmented"><label><input type="radio" name="type" value="income" checked><span>＋ Entrada</span></label><label><input type="radio" name="type" value="expense"><span>− Saída</span></label></div></div>
+      <div class="field"><label for="txDescription">Descrição</label><input id="txDescription" maxlength="80" placeholder="Ex.: Salário, mercado, aluguel" required></div>
+      <div class="form-row"><div class="field"><label for="txAmount">Valor (R$)</label><input id="txAmount" type="number" min="0.01" max="999999999" step="0.01" placeholder="0,00" required></div><div class="field"><label for="txDate">Data</label><input id="txDate" type="date" required></div></div>
+      <div class="form-row"><div class="field"><label for="txCategory">Categoria</label><select id="txCategory" required></select></div><div class="field"><label for="txAccount">Conta / meio</label><select id="txAccount"><option>Conta corrente</option><option>Dinheiro</option><option>Cartão de débito</option><option>Cartão de crédito</option><option>Pix</option><option>Poupança</option><option>Outro</option></select></div></div>
+      <div class="field"><label for="txNote">Observação (opcional)</label><input id="txNote" maxlength="160" placeholder="Algum detalhe importante"></div>
+      <p class="form-error" id="txError" role="alert"></p><div class="modal-actions"><button type="button" class="secondary-btn" data-close="transactionDialog">Cancelar</button><button class="primary-btn" type="submit">Salvar movimentação</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="goalDialog" class="modal"><form id="goalForm" method="dialog"><div class="modal-heading"><div><p class="eyebrow">PLANEJAMENTO</p><h2 id="goalModalTitle">Nova meta</h2></div><button type="button" class="close-btn" data-close="goalDialog">×</button></div><input type="hidden" id="goalId"><div class="field"><label for="goalName">Nome da meta</label><input id="goalName" maxlength="60" placeholder="Ex.: Reserva de emergência" required></div><div class="form-row"><div class="field"><label for="goalTarget">Valor desejado (R$)</label><input id="goalTarget" type="number" min="0.01" step="0.01" required></div><div class="field"><label for="goalSaved">Já guardado (R$)</label><input id="goalSaved" type="number" min="0" step="0.01" value="0" required></div></div><div class="field"><label for="goalDate">Prazo (opcional)</label><input id="goalDate" type="date"></div><p class="form-error" id="goalError" role="alert"></p><div class="modal-actions"><button type="button" class="secondary-btn" data-close="goalDialog">Cancelar</button><button class="primary-btn" type="submit">Salvar meta</button></div></form></dialog>
+
+  <dialog id="billDialog" class="modal"><form id="billForm" method="dialog"><div class="modal-heading"><div><p class="eyebrow">ORGANIZAÇÃO</p><h2 id="billModalTitle">Nova conta</h2></div><button type="button" class="close-btn" data-close="billDialog">×</button></div><input type="hidden" id="billId"><div class="field"><label for="billName">Nome da conta</label><input id="billName" maxlength="80" placeholder="Ex.: Internet, aluguel, energia" required></div><div class="form-row"><div class="field"><label for="billAmount">Valor (R$)</label><input id="billAmount" type="number" min="0.01" step="0.01" required></div><div class="field"><label for="billDue">Vencimento</label><input id="billDue" type="date" required></div></div><div class="field"><label for="billCategory">Categoria</label><select id="billCategory"><option>Moradia</option><option>Contas</option><option>Transporte</option><option>Saúde</option><option>Educação</option><option>Assinaturas</option><option>Cartão</option><option>Outros</option></select></div><p class="form-error" id="billError" role="alert"></p><div class="modal-actions"><button type="button" class="secondary-btn" data-close="billDialog">Cancelar</button><button class="primary-btn" type="submit">Salvar conta</button></div></form></dialog>
+
+  <dialog id="debtDialog" class="modal"><form id="debtForm" method="dialog"><div class="modal-heading"><div><p class="eyebrow">PLANEJAMENTO</p><h2 id="debtModalTitle">Nova dívida ou cartão</h2></div><button type="button" class="close-btn" data-close="debtDialog">×</button></div><input type="hidden" id="debtId"><div class="field"><label for="debtName">Nome</label><input id="debtName" maxlength="80" placeholder="Ex.: Cartão, empréstimo" required></div><div class="form-row"><div class="field"><label for="debtTotal">Valor total (R$)</label><input id="debtTotal" type="number" min="0.01" step="0.01" required></div><div class="field"><label for="debtPaid">Já pago (R$)</label><input id="debtPaid" type="number" min="0" step="0.01" value="0" required></div></div><div class="field"><label for="debtDue">Próximo vencimento (opcional)</label><input id="debtDue" type="date"></div><p class="form-error" id="debtError" role="alert"></p><div class="modal-actions"><button type="button" class="secondary-btn" data-close="debtDialog">Cancelar</button><button class="primary-btn" type="submit">Salvar dívida</button></div></form></dialog>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+</body>
+</html>
